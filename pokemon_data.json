@@ -1,0 +1,154 @@
+{
+    "cards": [
+        {
+            "id": 1,
+            "name": "Pikachu",
+            "hp": 100,
+            "max_hp": 100,
+            "type": "Eletric",
+            "attacks": [
+                {
+                    "name": "Thundershock",
+                    "damage": 20
+                },
+                {
+                    "name": "Thunderbolt",
+                    "damage": 50
+                }
+            ],
+            "image": "https://images.pokemontcg.io/base1/58_hires.png"
+        },
+        {
+            "id": 2,
+            "name": "Charizard",
+            "hp": 200,
+            "max_hp": 200,
+            "type": "Fire",
+            "attacks": [
+                {
+                    "name": "Fire Spin",
+                    "damage": 100
+                },
+                {
+                    "name": "Slash",
+                    "damage": 30
+                }
+            ],
+            "image": "https://images.pokemontcg.io/base1/4_hires.png"
+        },
+        {
+            "id": 3,
+            "name": "Blastoise",
+            "hp": 220,
+            "max_hp": 220,
+            "type": "Water",
+            "attacks": [
+                {
+                    "name": "Hydro Pump",
+                    "damage": 120
+                },
+                {
+                    "name": "Bite",
+                    "damage": 40
+                }
+            ],
+            "image": "https://images.pokemontcg.io/base1/2_hires.png"
+        },
+        {
+            "id": 4,
+            "name": "Venusaur",
+            "hp": 210,
+            "max_hp": 210,
+            "type": "Grass",
+            "attacks": [
+                {
+                    "name": "Solar Beam",
+                    "damage": 110
+                },
+                {
+                    "name": "Razor Leaf",
+                    "damage": 40
+                }
+            ],
+            "image": "https://images.pokemontcg.io/base1/15_hires.png"
+        },
+        {
+            "id": 5,
+            "name": "Mewtwo",
+            "hp": 250,
+            "max_hp": 250,
+            "type": "Psychic",
+            "attacks": [
+                {
+                    "name": "Psychic",
+                    "damage": 150
+                },
+                {
+                    "name": "Swift",
+                    "damage": 40
+                }
+            ],
+            "image": "https://images.pokemontcg.io/base1/10_hires.png"
+        }
+    ],
+    "users": {
+        "1384236760946704485": [
+            {
+                "id": 3,
+                "name": "Blastoise",
+                "hp": 220,
+                "max_hp": 220,
+                "type": "Water",
+                "attacks": [
+                    {
+                        "name": "Hydro Pump",
+                        "damage": 120
+                    },
+                    {
+                        "name": "Bite",
+                        "damage": 40
+                    }
+                ],
+                "image": "https://images.pokemontcg.io/base1/2_hires.png"
+            },
+            {
+                "id": 1,
+                "name": "Pikachu",
+                "hp": 100,
+                "max_hp": 100,
+                "type": "Eletric",
+                "attacks": [
+                    {
+                        "name": "Thundershock",
+                        "damage": 20
+                    },
+                    {
+                        "name": "Thunderbolt",
+                        "damage": 50
+                    }
+                ],
+                "image": "https://images.pokemontcg.io/base1/58_hires.png"
+            }
+        ],
+        "538805589174910986": [
+            {
+                "id": 2,
+                "name": "Charizard",
+                "hp": 200,
+                "max_hp": 200,
+                "type": "Fire",
+                "attacks": [
+                    {
+                        "name": "Fire Spin",
+                        "damage": 100
+                    },
+                    {
+                        "name": "Slash",
+                        "damage": 30
+                    }
+                ],
+                "image": "https://images.pokemontcg.io/base1/4_hires.png"
+            }
+        ]
+    }
+}

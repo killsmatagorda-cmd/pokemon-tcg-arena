@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon TCG Battle Arena - PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+</head>
+<body class="dark-mode">
+    
+    <!-- Deck Selection -->
+    <div id="deck-selection">
+        <h1>ESCOLHA SEU POKÉMON INICIAL</h1>
+        <div class="deck-grid" id="deck-grid">
+            <!-- Populado via JS -->
+        </div>
+    </div>
+
+    <div id="battle-container">
+        <!-- Oponente -->
+        <div id="opponent-area" class="player-area">
+            <div class="stats-box left">
+                <h3 id="opponent-name">Oponente</h3>
+                <div class="hp-bar-container">
+                    <div id="opponent-hp-bar" class="hp-bar fill" style="width: 100%;"></div>
+                </div>
+                <p id="opponent-hp-text">100 / 100 HP</p>
+                <div class="energy-pips" id="opponent-energy"></div>
+            </div>
+            <div id="opponent-card" class="card float">
+                <div class="card-frame"></div>
+                <img id="opponent-img" class="pokemon-sprite" src="" alt="Pokemon">
+            </div>
+        </div>
+
+        <!-- Arena Central -->
+        <div id="arena">
+            <div id="battle-log">
+                <p>Aguardando seleção de deck...</p>
+            </div>
+        </div>
+
+        <!-- Jogador -->
+        <div id="player-area" class="player-area">
+            <div id="player-card" class="card float">
+                <div class="card-frame"></div>
+                <img id="player-img" class="pokemon-sprite" src="" alt="Pokemon">
+            </div>
+            <div class="stats-box right">
+                <h3 id="player-name">Você</h3>
+                <div class="hp-bar-container">
+                    <div id="player-hp-bar" class="hp-bar fill" style="width: 100%;"></div>
+                </div>
+                <p id="player-hp-text">100 / 100 HP</p>
+                <div class="energy-pips" id="player-energy"></div>
+            </div>
+        </div>
+
+        <!-- HUD STRATEGIC -->
+        <div id="controls">
+            <!-- Submenus (Hidden by default) -->
+            <div id="attack-menu" class="submenu hidden"></div>
+            <div id="item-menu" class="submenu hidden"></div>
+            <div id="switch-menu" class="submenu hidden"></div>
+
+            <div class="hud-main">
+                <button id="btn-atacar" class="hud-btn">
+                    <span>⚔️</span> ATAQUE
+                </button>
+                <button id="btn-defesa" class="hud-btn purple">
+                    <span>🛡️</span> DEFESA
+                </button>
+                <button id="btn-item" class="hud-btn gold">
+                    <span>💊</span> ITENS
+                </button>
+                <button id="btn-trocar" class="hud-btn">
+                    <span>🔄</span> TROCAR
+                </button>
+                <button id="btn-fugir" class="hud-btn red">
+                    <span>🏃</span> FUGIR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
