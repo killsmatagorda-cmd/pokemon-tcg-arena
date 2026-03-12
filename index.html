@@ -11,9 +11,18 @@
 </head>
 <body class="dark-mode">
     
+    <!-- Tela de Início (Libera Áudio e Conecta) -->
+    <div id="start-overlay">
+        <div class="start-content">
+            <h1 class="neon-text">POKÉMON TCG PRO</h1>
+            <p>Conectando ao Servidor PvP...</p>
+            <button id="btn-start-game" class="start-btn">ENTRAR NA ARENA</button>
+        </div>
+    </div>
+
     <!-- Deck Selection -->
-    <div id="deck-selection">
-        <h1>ESCOLHA SEU POKÉMON INICIAL</h1>
+    <div id="deck-selection" class="hidden">
+        <h1>ESCOLHA SEU POKÉMON ATIVO</h1>
         <div class="deck-grid" id="deck-grid">
             <!-- Populado via JS -->
         </div>
