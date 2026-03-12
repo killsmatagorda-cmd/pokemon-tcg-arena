@@ -1,142 +1,92 @@
-// Sons usando Howler.js
+// Sistema de Dublagem e Sons (Howler.js)
 const sounds = {
+    // SFX
     hit: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'], volume: 0.5 }),
+    critical: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'], volume: 0.8 }),
     heal: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1954/1954-preview.mp3'], volume: 0.5 }),
-    win: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'], volume: 0.7 }),
     click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'], volume: 0.3 }),
-    switch: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'], volume: 0.4 })
+    
+    // Dublagens (Exemplos de URLs de voz sintetizada ou assets)
+    v_your_turn: new Howl({ src: ['https://translate.google.com/translate_tts?ie=UTF-8&q=%C3%89%20a%20sua%20vez!&tl=pt&client=tw-ob'], format: ['mp3'], volume: 0.8 }),
+    v_critical: new Howl({ src: ['https://translate.google.com/translate_tts?ie=UTF-8&q=Dano%20Cr%C3%ADtico!&tl=pt&client=tw-ob'], format: ['mp3'], volume: 0.9 }),
+    v_victory: new Howl({ src: ['https://translate.google.com/translate_tts?ie=UTF-8&q=Vit%C3%B3ria%20Absoluta!&tl=pt&client=tw-ob'], format: ['mp3'], volume: 1.0 })
 };
 
-let socket;
-let myId;
-let opponentId;
-let battleId;
-
-let gameState = {
-    player: null,
-    opponent: null,
-    turn: "none"
-};
+let socket, myId, opponentId, gameState = { player: null, opponent: null, turn: "none" };
 
 window.onload = async () => {
     const params = new URLSearchParams(window.location.search);
-    const p1Id = params.get('p1');
-    const p2Id = params.get('p2');
     const serverUrl = params.get('server');
-    
-    // Conectar ao Servidor WebSocket
-    if (serverUrl) {
-        // Inicializa o Socket
-        socket = io(serverUrl);
+    const p1Id = params.get('p1'), p2Id = params.get('p2');
+
+    if (!serverUrl) return log("Erro: Falha na conexão WebSocket.");
+
+    socket = io(serverUrl);
+    socket.on('connect', () => {
+        myId = prompt("Seu ID do Discord:") || p1Id;
+        socket.emit('join_battle', { p1: p1Id, p2: p2Id, isPlayer1: (myId === p1Id) });
+    });
+
+    socket.on('sync_state', (state) => {
+        const me = state.p1.id === myId ? state.p1 : state.p2;
+        const opp = state.p1.id === myId ? state.p2 : state.p1;
+        gameState.player = me; gameState.opponent = opp;
+        gameState.turn = state.turn === 'p1' ? state.p1.id : state.p2.id;
+        updateUI();
+        if (state.status === 'playing') document.getElementById('deck-selection').classList.add('hidden');
+    });
+
+    socket.on('action_result', (data) => {
+        log(data.message);
         
-        socket.on('connect', () => {
-            log(`Conectado ao Servidor PvP!`);
+        if (data.action === 'attack') {
+            const isAttackerMe = data.attacker === myId;
+            const attackerCard = isAttackerMe ? document.getElementById('player-card') : document.getElementById('opponent-card');
             
-            // O jogador que clica no link precisa se identificar. 
-            // Como é um link público, vamos usar um truque simples para este protótipo:
-            // Vamos perguntar quem ele é, ou assumir com base em um prompt.
-            let whoAmI = prompt("Qual é o seu ID do Discord? (Deixe em branco para simular como Desafiante)");
-            
-            if (whoAmI === p2Id) {
-                myId = p2Id;
-                opponentId = p1Id;
+            // ANIMAÇÃO DE PROJEÇÃO FÍSICA
+            attackerCard.classList.add(isAttackerMe ? 'project-forward-p1' : 'project-forward-p2');
+            setTimeout(() => attackerCard.classList.remove('project-forward-p1', 'project-forward-p2'), 600);
+
+            // Sons e Vozes
+            if (data.isCritical) {
+                sounds.critical.play();
+                sounds.v_critical.play();
             } else {
-                myId = p1Id;
-                opponentId = p2Id;
-            }
-
-            // Entra na sala
-            socket.emit('join_battle', { 
-                p1: p1Id, 
-                p2: p2Id, 
-                isPlayer1: (myId === p1Id)
-            });
-        });
-
-        socket.on('battle_status', (data) => {
-            log(data.message);
-        });
-
-        socket.on('sync_state', (state) => {
-            // state contém { p1: {}, p2: {}, turn: 'p1', status: 'playing' }
-            const me = state.p1.id === myId ? state.p1 : state.p2;
-            const opp = state.p1.id === myId ? state.p2 : state.p1;
-            
-            gameState.player = me;
-            gameState.opponent = opp;
-            gameState.turn = state.turn === 'p1' ? state.p1.id : state.p2.id;
-            
-            updateUI();
-            
-            if (state.status === 'playing') {
-                document.getElementById('deck-selection').classList.add('hidden');
-            }
-        });
-
-        socket.on('action_result', (data) => {
-            log(data.message);
-            if (data.action === 'attack') {
                 sounds.hit.play();
-                animateImpact(data.target === myId ? 'player-card' : 'opponent-card');
-                createParticles(data.target === myId ? 'player-card' : 'opponent-card', 'fire-particle');
-            } else if (data.action === 'heal') {
-                sounds.heal.play();
-            } else if (data.action === 'defend') {
-                sounds.click.play();
             }
-        });
+            
+            animateImpact(data.target === myId ? 'player-card' : 'opponent-card');
+            createParticles(data.target === myId ? 'player-card' : 'opponent-card', 'fire-particle');
 
-    } else {
-        log("Erro: Servidor PvP não encontrado na URL.");
-    }
-    
+        } else if (data.action === 'voice') {
+            if (data.type === 'your_turn') sounds.v_your_turn.play();
+        } else if (data.action === 'heal') {
+            sounds.heal.play();
+        }
+    });
+
     setupHUD();
 };
 
 function setupHUD() {
-    document.getElementById('btn-atacar').onclick = () => toggleSubmenu('attack-menu', renderAttacks);
-    document.getElementById('btn-defesa').onclick = () => useDefense();
-    document.getElementById('btn-item').onclick = () => toggleSubmenu('item-menu', renderItems);
-}
-
-function toggleSubmenu(id, renderer) {
-    sounds.click.play();
-    const menus = ['attack-menu', 'item-menu', 'switch-menu'];
-    menus.forEach(m => {
-        if (m === id) {
-            const el = document.getElementById(m);
-            if (el.classList.contains('hidden')) {
-                el.classList.remove('hidden');
-                renderer();
-            } else {
-                el.classList.add('hidden');
-            }
-        } else {
-            const el = document.getElementById(m);
-            if(el) el.classList.add('hidden');
-        }
-    });
+    document.getElementById('btn-atacar').onclick = () => toggleMenu('attack-menu', renderAttacks);
+    document.getElementById('btn-defesa').onclick = () => {
+        if (gameState.turn !== myId) return;
+        socket.emit('player_action', { action: 'defend' });
+    };
+    document.getElementById('btn-item').onclick = () => toggleMenu('item-menu', renderItems);
 }
 
 function renderAttacks() {
-    const menu = document.getElementById('attack-menu');
-    menu.innerHTML = '';
-    if (!gameState.player || !gameState.player.attacks) return;
-
+    const menu = document.getElementById('attack-menu'); menu.innerHTML = '';
     gameState.player.attacks.forEach((atk, i) => {
         const btn = document.createElement('button');
         btn.className = 'attack-option';
-        btn.innerHTML = `<strong>${atk.name}</strong><span class="cost">Dano: ${atk.damage}</span>`;
+        btn.innerHTML = `<strong>${atk.name}</strong><span>Dano: ${atk.damage}</span>`;
         btn.onclick = () => {
-            if (gameState.turn !== myId) return log("Não é o seu turno!");
-            
-            // Animação local antes de mandar pro server
-            const pImg = document.getElementById('player-img');
-            pImg.classList.add('attack-anim');
-            setTimeout(() => pImg.classList.remove('attack-anim'), 500);
-
+            if (gameState.turn !== myId) return;
             socket.emit('player_action', { action: 'attack', index: i });
-            document.getElementById('attack-menu').classList.add('hidden');
+            menu.parentElement.classList.add('hidden');
         };
         menu.appendChild(btn);
     });
@@ -144,72 +94,60 @@ function renderAttacks() {
 
 function renderItems() {
     const menu = document.getElementById('item-menu');
-    menu.innerHTML = `<button class="attack-option" onclick="useItem('potion')">Poção (x${gameState.player.potion || 0})</button>`;
+    menu.innerHTML = `<button class="attack-option" onclick="usePotion()">Poção (x${gameState.player.potion})</button>`;
 }
 
-function useDefense() {
-    if (gameState.turn !== myId) return log("Não é o seu turno!");
-    socket.emit('player_action', { action: 'defend' });
-    document.getElementById('attack-menu').classList.add('hidden'); // fecha menus abertos
-}
-
-function useItem(type) {
-    if (gameState.turn !== myId) return log("Não é o seu turno!");
-    socket.emit('player_action', { action: 'item', itemType: type });
+function usePotion() {
+    if (gameState.turn !== myId) return;
+    socket.emit('player_action', { action: 'item', itemType: 'potion' });
     document.getElementById('item-menu').classList.add('hidden');
 }
 
-function updateUI() {
-    if (!gameState.player || !gameState.opponent) return;
-
-    // Player
-    if(gameState.player.name) document.getElementById('player-name').innerText = gameState.player.name;
-    if(gameState.player.img) document.getElementById('player-img').src = gameState.player.img;
-    const pPercent = (gameState.player.hp / gameState.player.maxHp) * 100;
-    document.getElementById('player-hp-bar').style.width = Math.max(0, pPercent) + '%';
-    document.getElementById('player-hp-text').innerText = `${gameState.player.hp} / ${gameState.player.maxHp} HP`;
-
-    // Opponent
-    if(gameState.opponent.name) document.getElementById('opponent-name').innerText = gameState.opponent.name;
-    if(gameState.opponent.img) document.getElementById('opponent-img').src = gameState.opponent.img;
-    const oPercent = (gameState.opponent.hp / gameState.opponent.maxHp) * 100;
-    document.getElementById('opponent-hp-bar').style.width = Math.max(0, oPercent) + '%';
-    document.getElementById('opponent-hp-text').innerText = `${gameState.opponent.hp} / ${gameState.opponent.maxHp} HP`;
-    
-    // Status de Turno
-    if (gameState.turn === myId) {
-        document.getElementById('battle-log').style.borderColor = '#00ff00';
-    } else {
-        document.getElementById('battle-log').style.borderColor = '#333';
-    }
+function toggleMenu(id, renderer) {
+    sounds.click.play();
+    const menu = document.getElementById(id);
+    const isHidden = menu.classList.contains('hidden');
+    document.querySelectorAll('.submenu').forEach(m => m.classList.add('hidden'));
+    if (isHidden) { menu.classList.remove('hidden'); renderer(); }
 }
 
-function createParticles(targetId, className) {
-    const target = document.getElementById(targetId);
-    if(!target) return;
-    const rect = target.getBoundingClientRect();
-    for(let i=0; i<10; i++) {
+function updateUI() {
+    if (!gameState.player) return;
+    // Update HP Bars & Texts
+    const p1 = gameState.player, p2 = gameState.opponent;
+    document.getElementById('player-hp-bar').style.width = (p1.hp/p1.maxHp*100)+'%';
+    document.getElementById('opponent-hp-bar').style.width = (p2.hp/p2.maxHp*100)+'%';
+    document.getElementById('player-hp-text').innerText = `${p1.hp}/${p1.maxHp} HP`;
+    document.getElementById('opponent-hp-text').innerText = `${p2.hp}/${p2.maxHp} HP`;
+    document.getElementById('player-name').innerText = p1.name;
+    document.getElementById('opponent-name').innerText = p2.name;
+    document.getElementById('player-img').src = p1.image;
+    document.getElementById('opponent-img').src = p2.image;
+    
+    // Indicador de Turno Visual
+    document.getElementById('battle-log').style.boxShadow = gameState.turn === myId ? "0 0 20px #00ff00 inset" : "none";
+}
+
+function animateImpact(id) {
+    const el = document.getElementById(id);
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 500);
+}
+
+function createParticles(id, type) {
+    const rect = document.getElementById(id).getBoundingClientRect();
+    for(let i=0; i<8; i++) {
         const p = document.createElement('div');
-        p.className = `particle ${className}`;
-        p.style.left = (rect.left + Math.random() * rect.width) + 'px';
-        p.style.top = (rect.top + Math.random() * rect.height) + 'px';
+        p.className = 'particle fire-particle';
+        p.style.left = (rect.left + Math.random()*rect.width)+'px';
+        p.style.top = (rect.top + Math.random()*rect.height)+'px';
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 600);
     }
 }
 
-function animateImpact(id) {
-    const el = document.getElementById(id);
-    if(el) {
-        el.classList.add('shake');
-        setTimeout(() => el.classList.remove('shake'), 500);
-    }
-}
-
-function log(msg) {
-    const logBox = document.getElementById('battle-log');
-    if(!logBox) return;
-    const p = document.createElement('p');
-    p.innerText = `> ${msg}`;
-    logBox.prepend(p);
+function log(m) {
+    const b = document.getElementById('battle-log');
+    const p = document.createElement('p'); p.innerText = "> "+m;
+    b.prepend(p);
 }
