@@ -20,6 +20,8 @@ window.onload = async () => {
     const p1Id = params.get('p1');
     const p2Id = params.get('p2');
 
+    const selectionScreen = document.getElementById('deck-selection');
+
     try {
         const response = await fetch('pokemon_data.json');
         const data = await response.json();
@@ -44,24 +46,25 @@ window.onload = async () => {
                 img: p2Pkmn.image 
             };
 
-            document.getElementById('deck-selection').classList.add('hidden');
+            // Esconde a tela de seleção e mostra o jogo
+            selectionScreen.style.display = 'none';
+            selectionScreen.classList.add('hidden');
+            
             updateUI();
-            log(`Batalha iniciada: ${gameState.player.name} vs ${gameState.opponent.pokemon}!`);
+            log(`⚔️ Batalha Iniciada!`);
+            log(`${gameState.player.name} vs ${gameState.opponent.pokemon}`);
         } else {
-            // Fallback para seleção manual se não houver IDs na URL
+            // Fallback se não houver IDs
+            selectionScreen.style.display = 'flex';
             playerDeck = [
                 { name: "Pikachu", hp: 100, maxHp: 100, img: "https://images.pokemontcg.io/base1/58_hires.png", attacks: [{name: "Choque do Trovão", damage: 20}, {name: "Trovão", damage: 50}] },
-                { name: "Charizard", hp: 150, maxHp: 150, img: "https://images.pokemontcg.io/base1/4_hires.png", attacks: [{name: "Garra de Metal", damage: 30}, {name: "Giro de Fogo", damage: 100}] },
-                { name: "Blastoise", hp: 160, maxHp: 160, img: "https://images.pokemontcg.io/base1/2_hires.png", attacks: [{name: "Jato de Água", damage: 40}, {name: "Hidro Bomba", damage: 90}] },
-                { name: "Venusaur", hp: 160, maxHp: 160, img: "https://images.pokemontcg.io/base1/15_hires.png", attacks: [{name: "Folha Navalha", damage: 35}, {name: "Raio Solar", damage: 120}] },
-                { name: "Mewtwo", hp: 130, maxHp: 130, img: "https://images.pokemontcg.io/base1/10_hires.png", attacks: [{name: "Psíquico", damage: 50}, {name: "Barreira", damage: 0}] },
-                { name: "Gengar", hp: 110, maxHp: 110, img: "https://images.pokemontcg.io/base1/6_hires.png", attacks: [{name: "Sombra Noturna", damage: 40}, {name: "Confusão", damage: 30}] }
+                { name: "Charizard", hp: 150, maxHp: 150, img: "https://images.pokemontcg.io/base1/4_hires.png", attacks: [{name: "Garra de Metal", damage: 30}, {name: "Giro de Fogo", damage: 100}] }
             ];
             initDeckSelection();
         }
     } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        log("Erro ao carregar dados da batalha.");
+        console.error("Erro:", error);
+        selectionScreen.innerHTML = "<h1>Erro ao carregar dados da batalha</h1>";
     }
     
     setupHUD();
